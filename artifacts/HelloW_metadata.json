@@ -1,0 +1,45 @@
+{
+	"compiler": {
+		"version": "0.8.24+commit.e11b9ed9"
+	},
+	"language": "Solidity",
+	"output": {
+		"abi": [],
+		"devdoc": {
+			"kind": "dev",
+			"methods": {},
+			"version": 1
+		},
+		"userdoc": {
+			"kind": "user",
+			"methods": {},
+			"version": 1
+		}
+	},
+	"settings": {
+		"compilationTarget": {
+			"tests/helloworld.sol": "HelloW"
+		},
+		"evmVersion": "shanghai",
+		"libraries": {},
+		"metadata": {
+			"bytecodeHash": "ipfs"
+		},
+		"optimizer": {
+			"enabled": false,
+			"runs": 200
+		},
+		"remappings": []
+	},
+	"sources": {
+		"tests/helloworld.sol": {
+			"keccak256": "0xa586ef338497b98eef6d419cb1244ecb88b0865853df80d5ae955263045c7983",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://8f5e567fbed384c5e0dfa7d26c73f9ef90b7c5a2a0383957ca0305d4016a2d88",
+				"dweb:/ipfs/QmWwTUA5AzpSMV8EpiBCHTaoa4APiTwjLtCm5TsjCXHsnt"
+			]
+		}
+	},
+	"version": 1
+}
