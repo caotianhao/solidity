@@ -1,5 +1,5 @@
-import { expect } from "chai";
-import { ethers } from "hardhat";
+import {expect} from "chai";
+import {ethers} from "hardhat";
 
 describe("HelloWorld", function () {
     it("should return initial message", async function () {
