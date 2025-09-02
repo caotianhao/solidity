@@ -18,7 +18,7 @@
 	},
 	"settings": {
 		"compilationTarget": {
-			"contracts/test2.sol": "Name"
+			"contracts/test4.sol": "Test4"
 		},
 		"evmVersion": "prague",
 		"libraries": {},
@@ -32,12 +32,12 @@
 		"remappings": []
 	},
 	"sources": {
-		"contracts/test2.sol": {
-			"keccak256": "0x654498fee74ac7e61708f47ca3e438ceaff759d869e3bf926c07f0b193877b2f",
+		"contracts/test4.sol": {
+			"keccak256": "0xd190e8271cbc24375cdea55a06170da62401e3228f64373fbb013d2a079d96f6",
 			"license": "MIT",
 			"urls": [
-				"bzz-raw://fa432cf13ca5f9371887c8a869cd34841ec2897a48f5927ced473f486c7c6250",
-				"dweb:/ipfs/Qmc1KHVQ8bwGrz9nvEEXdyz8NYF1dZKyvzo99CmfQBunt4"
+				"bzz-raw://80cc434cc6c088e5d718910bce2560ff0581dc0992b5857e2886f83d700ad70e",
+				"dweb:/ipfs/QmXRNRajUvupG7QB1ko2T1RFePR8pCgeKwee2XQfgDnbTH"
 			]
 		}
 	},
