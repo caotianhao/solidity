@@ -27,6 +27,10 @@ contract MyVote {
         }
     }
 
+    function getProposalsLength() external view returns (uint) {
+        return proposals.length;
+    }
+
     function giveRightToVote(address voter) external {
         require(msg.sender == chairman, "[giveRightToVote] not chairman");
         require(!voters[voter].voted, "[giveRightToVote] has voted");
