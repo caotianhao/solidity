@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.28;
 
+import "./utils/Address.sol";
+
 /// @title Lock
 /// @notice 时间锁：部署时存入 ETH，仅在到达解锁时间后由 owner 一次性提走。
 contract Lock {
@@ -27,7 +29,6 @@ contract Lock {
 
         uint256 amount = address(this).balance;
         emit Withdrawal(amount, block.timestamp);
-        (bool ok,) = owner.call{value: amount}("");
-        require(ok, "Transfer failed");
+        Address.sendValue(owner, amount);
     }
 }

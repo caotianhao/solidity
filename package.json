@@ -9,6 +9,7 @@
     "test:vote": "hardhat test --grep MyVote",
     "node": "hardhat node",
     "deploy:local": "hardhat run scripts/deploy_MyVote.ts --network localhost",
+    "deploy:upgradeable": "hardhat run scripts/deploy_MyVoteUpgradeable.ts --network localhost",
     "deploy:faucet": "hardhat run scripts/deploy_Faucet.ts --network localhost",
     "deploy:minter": "hardhat run scripts/deploy_Minter.ts --network localhost",
     "deploy:token": "hardhat run scripts/deploy_SimpleToken.ts --network localhost",

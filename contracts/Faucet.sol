@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.28;
 
+import "./utils/Address.sol";
+
 /// @title Faucet
 /// @notice 水龙头：任何人可向合约充值，任何人可领取不超过单次上限的 ETH。
 /// @dev 通过 receive() 接收 ETH；withdraw 限制单次最大 1 ether。
@@ -18,8 +20,7 @@ contract Faucet {
     function withdraw(uint256 amount) external {
         if (amount > MAX_WITHDRAWAL) revert WithdrawAmountTooLarge(amount, MAX_WITHDRAWAL);
 
-        (bool ok,) = payable(msg.sender).call{value: amount}("");
-        if (!ok) revert WithdrawFailed();
+        Address.sendValue(payable(msg.sender), amount);
 
         emit Withdrawn(msg.sender, amount);
     }

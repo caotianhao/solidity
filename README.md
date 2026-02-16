@@ -6,28 +6,20 @@
 
 ```
 hello-contract/
-├── contracts/           # Solidity 合约
-│   ├── MyVote.sol       # 投票 DApp（主席授权、委托、直接投票）
-│   ├── Minter.sol       # 内部账本转账
-│   ├── Faucet.sol       # ETH 水龙头
-│   ├── SimpleToken.sol  # 极简代币（transfer）
-│   ├── Lock.sol         # 时间锁提款
-│   ├── HelloWorld.sol   # 可变消息存储
-│   ├── HelloWorld2.sol  # 固定消息 + run()
-│   └── exe.sol          # 简单存储 + 纯函数
-├── scripts/             # 部署与运维脚本
-│   ├── deploy_MyVote.ts
-│   ├── deploy_Faucet.ts
-│   ├── deploy_Minter.ts
-│   ├── deploy_SimpleToken.ts
-│   ├── deploy_Lock.ts
-│   ├── deploy_HelloWorld.ts
-│   ├── deploy_HelloWorld2.ts
-│   ├── deploy_exe.ts
-│   ├── fund_Faucet.ts   # 给水龙头充值
-│   └── withdraw_Faucet.ts
-├── test/                # 单测（Mocha + Chai）
-├── frontend/            # MyVote 前端（Vite + React）
+├── contracts/               # 所有 Solidity 合约（统一参与编译）
+│   ├── MyVote.sol           # 投票 DApp（不可升级）
+│   ├── MyVoteUpgradeable.sol # 可升级版投票（initialize 初始化）
+│   ├── Minter.sol / Faucet.sol / SimpleToken.sol / Lock.sol
+│   ├── HelloWorld.sol / HelloWorld2.sol / exe.sol
+│   ├── utils/               # Address、StorageSlot（Faucet/Lock 与 Proxy 使用）
+│   ├── interfaces/          # IERC1967、IERC1822（ERC1967 代理用）
+│   └── beacon/              # Proxy、ERC1967（Upgrade、ERC1967Proxy）、BeaconProxy
+├── scripts/
+│   ├── deploy_MyVote.ts / deploy_MyVoteUpgradeable.ts
+│   ├── deploy_Faucet.ts、deploy_Minter.ts、deploy_SimpleToken.ts、deploy_Lock.ts 等
+│   ├── fund_Faucet.ts、withdraw_Faucet.ts
+├── test/
+├── frontend/
 └── hardhat.config.ts
 ```
 
@@ -36,10 +28,12 @@ hello-contract/
 | 合约 | 说明 | 要点 |
 |------|------|------|
 | **MyVote** | 链上投票 | 主席授权、委托链、直接投票、事件、getSummary |
-| **Minter** | 内部余额 | mapping 余额、send 转账、Transfer 事件、零地址/余额不足 revert |
-| **Faucet** | ETH 水龙头 | receive 入金、withdraw 单次 ≤1 ether、事件、自定义错误 |
-| **SimpleToken** | 极简代币 | name/symbol/decimals、transfer、零地址/余额检查 |
-| **Lock** | 时间锁 | 到期后仅 owner 可 withdraw、自定义错误 |
+| **MyVoteUpgradeable** | 可升级投票 | 同 MyVote 逻辑，`initialize` 初始化，配合 ERC1967Proxy 部署 |
+| **ERC1967Proxy** | EIP-1967 代理 | 委托调用实现合约，与 MyVoteUpgradeable 配合使用 |
+| **Minter** | 内部余额 | mapping 余额、send 转账、Transfer 事件 |
+| **Faucet** | ETH 水龙头 | receive 入金、withdraw ≤1 ether、**Address.sendValue** |
+| **SimpleToken** | 极简代币 | name/symbol/decimals、transfer |
+| **Lock** | 时间锁 | 到期后 owner 可 withdraw、**Address.sendValue** |
 | **HelloWorld** | 消息存储 | 可 setMessage、MessageSet 事件 |
 | **HelloWorld2** | 只读 + run | 固定 message、run() 触发 RunCalled |
 | **exe** | 存储 + 计算 | setValue/getValue、add 纯函数、ValueSet 事件 |
@@ -74,8 +68,9 @@ npm run node
 终端二按需部署（`--network localhost` 可省略，脚本内可再通过 `--network` 指定）：
 
 ```bash
-npm run deploy:local     # MyVote
-npm run deploy:faucet    # Faucet
+npm run deploy:local       # MyVote（不可升级）
+npm run deploy:upgradeable # MyVoteUpgradeable + ERC1967Proxy（可升级，前端用 Proxy 地址）
+npm run deploy:faucet      # Faucet
 npm run deploy:minter    # Minter（可选参数：初始余额，默认 10000）
 npm run deploy:token     # SimpleToken（可选参数：供应量，默认 1000000）
 npm run deploy:lock      # Lock（可选参数：锁定年数、ETH 数量）
@@ -120,6 +115,7 @@ cd frontend && npm install && npm run dev
 | `npm run test:vote` | 仅 MyVote 测试 |
 | `npm run node` | 启动本地节点 |
 | `npm run deploy:local` | 部署 MyVote 到 localhost |
+| `npm run deploy:upgradeable` | 部署可升级 MyVote（实现 + Proxy） |
 | `npm run deploy:faucet` | 部署 Faucet |
 | `npm run deploy:minter` | 部署 Minter |
 | `npm run deploy:token` | 部署 SimpleToken |
