@@ -50,12 +50,10 @@ describe("Lock", function () {
     });
 
     it("Should fail if the unlockTime is not in the future", async function () {
-      // We don't use the fixture here because we want a different deployment
       const latestTime = await time.latest();
       const Lock = await hre.ethers.getContractFactory("Lock");
-      await expect(Lock.deploy(latestTime, { value: 1 })).to.be.revertedWith(
-        "Unlock time should be in the future"
-      );
+      await expect(Lock.deploy(latestTime, { value: 1 }))
+        .to.be.revertedWithCustomError(Lock, "UnlockTimeNotInFuture");
     });
   });
 
@@ -63,10 +61,8 @@ describe("Lock", function () {
     describe("Validations", function () {
       it("Should revert with the right error if called too soon", async function () {
         const { lock } = await loadFixture(deployOneYearLockFixture);
-
-        await expect(lock.withdraw()).to.be.revertedWith(
-          "You can't withdraw yet"
-        );
+        await expect(lock.withdraw())
+          .to.be.revertedWithCustomError(lock, "CannotWithdrawYet");
       });
 
       it("Should revert with the right error if called from another account", async function () {
@@ -78,9 +74,8 @@ describe("Lock", function () {
         await time.increaseTo(unlockTime);
 
         // We use lock.connect() to send a transaction from another account
-        await expect(lock.connect(otherAccount).withdraw()).to.be.revertedWith(
-          "You aren't the owner"
-        );
+        await expect(lock.connect(otherAccount).withdraw())
+          .to.be.revertedWithCustomError(lock, "NotOwner");
       });
 
       it("Shouldn't fail if the unlockTime has arrived and the owner calls it", async function () {

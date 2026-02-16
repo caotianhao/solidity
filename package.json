@@ -4,7 +4,20 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "compile": "hardhat compile",
+    "test": "hardhat test",
+    "test:vote": "hardhat test --grep MyVote",
+    "node": "hardhat node",
+    "deploy:local": "hardhat run scripts/deploy_MyVote.ts --network localhost",
+    "deploy:faucet": "hardhat run scripts/deploy_Faucet.ts --network localhost",
+    "deploy:minter": "hardhat run scripts/deploy_Minter.ts --network localhost",
+    "deploy:token": "hardhat run scripts/deploy_SimpleToken.ts --network localhost",
+    "deploy:lock": "hardhat run scripts/deploy_Lock.ts --network localhost",
+    "deploy:hello": "hardhat run scripts/deploy_HelloWorld.ts --network localhost",
+    "deploy:exe": "hardhat run scripts/deploy_exe.ts --network localhost",
+    "fund:faucet": "hardhat run scripts/fund_Faucet.ts --network localhost",
+    "withdraw:faucet": "hardhat run scripts/withdraw_Faucet.ts --network localhost",
+    "sync-abi": "node -e \"require('fs').copyFileSync('artifacts/contracts/MyVote.sol/MyVote.json','frontend/src/MyVote.json')\""
   },
   "keywords": [],
   "author": "",

@@ -1,5 +1,5 @@
-import {expect} from "chai";
-import {ethers} from "hardhat";
+import { expect } from "chai";
+import { ethers } from "hardhat";
 
 describe("HelloWorld", function () {
     it("should return initial message", async function () {
@@ -13,5 +13,13 @@ describe("HelloWorld", function () {
         const hello = await HelloWorld.deploy("Hello, Hardhat!");
         await hello.setMessage("New Message");
         expect(await hello.message()).to.equal("New Message");
+    });
+
+    it("should emit MessageSet on setMessage", async function () {
+        const HelloWorld = await ethers.getContractFactory("HelloWorld");
+        const hello = await HelloWorld.deploy("Hi");
+        await expect(hello.setMessage("Bye"))
+            .to.emit(hello, "MessageSet")
+            .withArgs("Hi", "Bye");
     });
 });

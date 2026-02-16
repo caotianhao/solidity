@@ -1,24 +1,26 @@
-import {expect} from "chai";
-import {ethers} from "hardhat";
-import {MyVote} from "../typechain-types";
+import { expect } from "chai";
+import { ethers } from "hardhat";
+import type { SignerWithAddress } from "@nomicfoundation/hardhat-ethers/signers";
+import type { MyVote } from "../typechain-types";
 
-describe("MyVote 合约测试", function () {
-    let myVote: MyVote;
-    let chairman: any;
-    let voter1: any;
-    let voter2: any;
-    let voter3: any;
-    const proposals = [
+const PROPOSALS = [
         "Alice", "Bob", "Charlie", "David", "Eve",
         "Frank", "Grace", "Hannah", "Ian", "Jack",
         "Karen", "Leo", "Mona", "Nina", "Oscar",
-        "Paul", "Quincy", "Rachel", "Steve", "Tracy"
-    ];
+    "Paul", "Quincy", "Rachel", "Steve", "Tracy",
+];
+
+describe("MyVote 合约测试", function () {
+    let myVote: MyVote;
+    let chairman: SignerWithAddress;
+    let voter1: SignerWithAddress;
+    let voter2: SignerWithAddress;
+    let voter3: SignerWithAddress;
 
     beforeEach(async () => {
         [chairman, voter1, voter2, voter3] = await ethers.getSigners();
         const MyVoteFactory = await ethers.getContractFactory("MyVote");
-        myVote = (await MyVoteFactory.deploy(proposals)) as MyVote;
+        myVote = (await MyVoteFactory.deploy(PROPOSALS)) as MyVote;
         await myVote.waitForDeployment();
     });
 
@@ -77,5 +79,50 @@ describe("MyVote 合约测试", function () {
 
         expect(winnerIndex).to.equal(1);
         expect(winnerName).to.equal("Bob");
+    });
+
+    it("doVote 越界应失败", async () => {
+        await myVote.giveRightToVote(voter1.address);
+        await expect(myVote.connect(voter1).doVote(100)).to.be.revertedWith(
+            "[doVote] invalid proposal index"
+        );
+    });
+
+    it("已投票后再次 doVote 应失败", async () => {
+        await myVote.giveRightToVote(voter1.address);
+        await myVote.connect(voter1).doVote(0);
+        await expect(myVote.connect(voter1).doVote(1)).to.be.revertedWith(
+            "[doVote] you voted"
+        );
+    });
+
+    it("授权应触发 RightToVoteGranted 事件", async () => {
+        await expect(myVote.giveRightToVote(voter1.address))
+            .to.emit(myVote, "RightToVoteGranted")
+            .withArgs(voter1.address);
+    });
+
+    it("委托应触发 Delegated 事件", async () => {
+        await myVote.giveRightToVote(voter1.address);
+        await myVote.giveRightToVote(voter2.address);
+        await expect(myVote.connect(voter1).delegate(voter2.address))
+            .to.emit(myVote, "Delegated")
+            .withArgs(voter1.address, voter2.address);
+    });
+
+    it("投票应触发 VoteCast 事件", async () => {
+        await myVote.giveRightToVote(voter1.address);
+        await expect(myVote.connect(voter1).doVote(2))
+            .to.emit(myVote, "VoteCast")
+            .withArgs(voter1.address, 2, 1);
+    });
+
+    it("getSummary 返回正确", async () => {
+        await myVote.giveRightToVote(voter1.address);
+        await myVote.connect(chairman).doVote(1);
+        const [chairman_, count, winner] = await myVote.getSummary();
+        expect(chairman_).to.equal(chairman.address);
+        expect(count).to.equal(PROPOSALS.length);
+        expect(winner).to.equal("Bob");
     });
 });

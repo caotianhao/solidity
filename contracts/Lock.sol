@@ -1,34 +1,33 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.28;
 
-// Uncomment this line to use console.log
-// import "hardhat/console.sol";
-
+/// @title Lock
+/// @notice 时间锁：部署时存入 ETH，仅在到达解锁时间后由 owner 一次性提走。
 contract Lock {
-    uint public unlockTime;
+    event Withdrawal(uint256 amount, uint256 when);
+
+    error UnlockTimeNotInFuture();
+    error CannotWithdrawYet();
+    error NotOwner();
+
+    uint256 public unlockTime;
     address payable public owner;
 
-    event Withdrawal(uint amount, uint when);
-
-    constructor(uint _unlockTime) payable {
-        require(
-            block.timestamp < _unlockTime,
-            "Unlock time should be in the future"
-        );
-
+    /// @param _unlockTime 解锁时间戳（必须大于 block.timestamp）
+    constructor(uint256 _unlockTime) payable {
+        if (block.timestamp >= _unlockTime) revert UnlockTimeNotInFuture();
         unlockTime = _unlockTime;
         owner = payable(msg.sender);
     }
 
-    function withdraw() public {
-        // Uncomment this line, and the import of "hardhat/console.sol", to print a log in your terminal
-        // console.log("Unlock time is %o and block timestamp is %o", unlockTime, block.timestamp);
+    /// @notice 取回合约内全部 ETH，仅 owner 且在解锁时间之后可调用
+    function withdraw() external {
+        if (block.timestamp < unlockTime) revert CannotWithdrawYet();
+        if (msg.sender != owner) revert NotOwner();
 
-        require(block.timestamp >= unlockTime, "You can't withdraw yet");
-        require(msg.sender == owner, "You aren't the owner");
-
-        emit Withdrawal(address(this).balance, block.timestamp);
-
-        owner.transfer(address(this).balance);
+        uint256 amount = address(this).balance;
+        emit Withdrawal(amount, block.timestamp);
+        (bool ok,) = owner.call{value: amount}("");
+        require(ok, "Transfer failed");
     }
 }

@@ -2,16 +2,20 @@
 pragma solidity ^0.8.10;
 
 contract MyVote {
+    event RightToVoteGranted(address indexed voter);
+    event Delegated(address indexed from, address indexed to);
+    event VoteCast(address indexed voter, uint256 indexed proposalIndex, uint256 weight);
+
     struct Voter {
-        uint weight;
+        uint256 weight;
         bool voted;
         address delegateTo;
-        uint voteTo;
+        uint256 voteTo;
     }
 
     struct Proposal {
         string name;
-        uint voteCount;
+        uint256 voteCount;
     }
 
     address public chairman;
@@ -22,20 +26,23 @@ contract MyVote {
         chairman = msg.sender;
         voters[chairman].weight = 1;
 
-        for (uint i = 0; i < proposalNames.length; i++) {
+        uint256 len = proposalNames.length;
+        for (uint256 i; i < len;) {
             proposals.push(Proposal(proposalNames[i], 0));
+            unchecked { ++i; }
         }
     }
 
-    function getProposalsLength() external view returns (uint) {
+    function getProposalsLength() external view returns (uint256) {
         return proposals.length;
     }
 
     function giveRightToVote(address voter) external {
         require(msg.sender == chairman, "[giveRightToVote] not chairman");
         require(!voters[voter].voted, "[giveRightToVote] has voted");
-        require(voters[voter].weight == 0, "[giveRightToVote] has weights");
+        require(voters[voter].weight == 0, "[giveRightToVote] already has weight");
         voters[voter].weight = 1;
+        emit RightToVoteGranted(voter);
     }
 
     function delegate(address to) external {
@@ -59,9 +66,11 @@ contract MyVote {
         } else {
             delegatee.weight += sender.weight;
         }
+        emit Delegated(msg.sender, to);
     }
 
-    function doVote(uint proposal) external {
+    function doVote(uint256 proposal) external {
+        require(proposal < proposals.length, "[doVote] invalid proposal index");
         Voter storage sender = voters[msg.sender];
         require(sender.weight != 0, "[doVote] you have no weight");
         require(!sender.voted, "[doVote] you voted");
@@ -69,20 +78,33 @@ contract MyVote {
         sender.voted = true;
         sender.voteTo = proposal;
         proposals[proposal].voteCount += sender.weight;
+        emit VoteCast(msg.sender, proposal, sender.weight);
     }
 
-    function winningProposal() public view returns (uint winningProposal_){
-        uint winningVoteCount = 0;
-        for (uint i = 0; i < proposals.length; i++) {
+    function winningProposal() public view returns (uint256 winningProposal_) {
+        uint256 winningVoteCount;
+        uint256 len = proposals.length;
+        for (uint256 i; i < len;) {
             if (proposals[i].voteCount > winningVoteCount) {
                 winningVoteCount = proposals[i].voteCount;
                 winningProposal_ = i;
             }
+            unchecked { ++i; }
         }
-        return winningProposal_;
     }
 
-    function winnerName() external view returns (string memory){
+    function winnerName() external view returns (string memory) {
         return proposals[winningProposal()].name;
+    }
+
+    /// @return chairman_ 主席地址
+    /// @return proposalCount_ 提案数量
+    /// @return winnerName_ 当前领先者名称
+    function getSummary() external view returns (
+        address chairman_,
+        uint256 proposalCount_,
+        string memory winnerName_
+    ) {
+        return (chairman, proposals.length, this.winnerName());
     }
 }

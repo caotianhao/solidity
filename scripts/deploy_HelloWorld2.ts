@@ -1,15 +1,16 @@
-import {ethers} from "hardhat";
+import { ethers } from "hardhat";
 
 async function main() {
+    const [deployer] = await ethers.getSigners();
+    console.log("Deploying HelloWorld2 with account:", deployer.address);
+
     const HelloWorld2 = await ethers.getContractFactory("HelloWorld2");
     const hello = await HelloWorld2.deploy();
-
     await hello.waitForDeployment();
-
-    console.log(`Deployed to: ${hello.target}`);
+    console.log("HelloWorld2 deployed at:", await hello.getAddress());
 }
 
-main().catch((error) => {
-    console.error(error);
+main().catch((err) => {
+    console.error(err);
     process.exitCode = 1;
 });
