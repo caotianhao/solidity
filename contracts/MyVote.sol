@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.8.10;
+pragma solidity ^0.8.28;
 
 contract MyVote {
     event RightToVoteGranted(address indexed voter);
@@ -97,9 +97,6 @@ contract MyVote {
         return proposals[winningProposal()].name;
     }
 
-    /// @return chairman_ 主席地址
-    /// @return proposalCount_ 提案数量
-    /// @return winnerName_ 当前领先者名称
     function getSummary() external view returns (
         address chairman_,
         uint256 proposalCount_,

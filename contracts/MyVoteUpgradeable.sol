@@ -1,8 +1,6 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.28;
 
-/// @title MyVoteUpgradeable
-/// @notice 可升级版投票合约：逻辑与 MyVote 一致，通过 initializer 初始化，供 ERC1967Proxy 使用。
 contract MyVoteUpgradeable {
     event RightToVoteGranted(address indexed voter);
     event Delegated(address indexed from, address indexed to);
@@ -32,7 +30,6 @@ contract MyVoteUpgradeable {
         _initialized = true;
     }
 
-    /// @param proposalNames 提案名称列表
     function initialize(string[] memory proposalNames) external onlyInitializing {
         chairman = msg.sender;
         voters[chairman].weight = 1;

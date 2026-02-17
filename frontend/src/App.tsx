@@ -74,7 +74,7 @@ function App() {
                 loadVoterInfo(contract, currentAccount),
             ]);
         } catch (e) {
-            setError(e instanceof Error ? e.message : "刷新失败");
+            setError(e instanceof Error ? e.message : "Refresh failed");
         }
     }, [contract, currentAccount, loadSummary, loadProposals, loadVoterInfo]);
 
@@ -101,7 +101,7 @@ function App() {
                 await loadVoterInfo(c, account);
             } catch (e) {
                 if (!cancelled) {
-                    setError(e instanceof Error ? e.message : "连接失败");
+                    setError(e instanceof Error ? e.message : "Connection failed");
                 }
             } finally {
                 if (!cancelled) setLoading(false);
@@ -118,10 +118,10 @@ function App() {
         try {
             const tx = await contract.giveRightToVote(inputAddress);
             await tx.wait();
-            alert("授权成功");
+            alert("Granted successfully");
             await refresh();
         } catch (e) {
-            setError(e instanceof Error ? e.message : "授权失败");
+            setError(e instanceof Error ? e.message : "Grant failed");
         } finally {
             setTxPending(false);
         }
@@ -134,10 +134,10 @@ function App() {
         try {
             const tx = await contract.delegate(inputAddress);
             await tx.wait();
-            alert("委托成功");
+            alert("Delegated successfully");
             await refresh();
         } catch (e) {
-            setError(e instanceof Error ? e.message : "委托失败");
+            setError(e instanceof Error ? e.message : "Delegate failed");
         } finally {
             setTxPending(false);
         }
@@ -150,10 +150,10 @@ function App() {
         try {
             const tx = await contract.doVote(index);
             await tx.wait();
-            alert(`投票成功: ${proposals[index]?.name ?? index}`);
+            alert(`Vote successful: ${proposals[index]?.name ?? index}`);
             await refresh();
         } catch (e) {
-            setError(e instanceof Error ? e.message : "投票失败");
+            setError(e instanceof Error ? e.message : "Vote failed");
         } finally {
             setTxPending(false);
         }
@@ -165,7 +165,7 @@ function App() {
     if (loading) {
         return (
             <div className="app">
-                <div className="loading">正在连接节点并加载合约…</div>
+                <div className="loading">Connecting to node and loading contract…</div>
             </div>
         );
     }
@@ -173,8 +173,8 @@ function App() {
     return (
         <div className="app">
             <header className="app-header">
-                <h1>MyVote 投票 DApp</h1>
-                <p className="subtitle">本地节点演示 · 主席授权 · 委托或直接投票</p>
+                <h1>MyVote DApp</h1>
+                <p className="subtitle">Local node · Chair grants rights · Delegate or vote</p>
             </header>
 
             {error && (
@@ -184,47 +184,47 @@ function App() {
             )}
 
             <section className="card">
-                <h2>当前账户</h2>
+                <h2>Current account</h2>
                 <p className="address">{currentAccount ? shortAddress(currentAccount) : "—"}</p>
                 {voterInfo && (
                     <div className="voter-status">
                         <span className={voterInfo.weight > 0n ? "badge ok" : "badge muted"}>
-                            权重: {Number(voterInfo.weight)}
+                            Weight: {Number(voterInfo.weight)}
                         </span>
                         {voterInfo.voted ? (
                             voterInfo.delegateTo !== ethers.ZeroAddress ? (
-                                <span className="badge delegate">已委托 → {shortAddress(voterInfo.delegateTo)}</span>
+                                <span className="badge delegate">Delegated → {shortAddress(voterInfo.delegateTo)}</span>
                             ) : (
-                                <span className="badge voted">已投票 → 提案 #{Number(voterInfo.voteTo)}</span>
+                                <span className="badge voted">Voted → Proposal #{Number(voterInfo.voteTo)}</span>
                             )
                         ) : (
-                            <span className="badge pending">未投票</span>
+                            <span className="badge pending">Not voted</span>
                         )}
                     </div>
                 )}
                 {summary && currentAccount === summary.chairman && (
-                    <span className="badge chairman">主席</span>
+                    <span className="badge chairman">Chair</span>
                 )}
             </section>
 
             <section className="card">
                 <div className="section-head">
-                    <h2>候选人列表</h2>
+                    <h2>Candidates</h2>
                     <button type="button" onClick={refresh} disabled={txPending}>
-                        刷新
+                        Refresh
                     </button>
                 </div>
                 <ul className="proposal-list">
                     {proposals.map((p, i) => (
                         <li key={`${i}-${p.name}`}>
                             <span className="proposal-name">{i}. {p.name}</span>
-                            <span className="proposal-votes">{p.voteCount} 票</span>
+                            <span className="proposal-votes">{p.voteCount} votes</span>
                             <button
                                 type="button"
                                 onClick={() => vote(i)}
                                 disabled={txPending || (voterInfo?.voted ?? false)}
                             >
-                                投票
+                                Vote
                             </button>
                         </li>
                     ))}
@@ -232,26 +232,26 @@ function App() {
             </section>
 
             <section className="card">
-                <h2>操作</h2>
+                <h2>Actions</h2>
                 <div className="actions">
                     <input
                         type="text"
-                        placeholder="输入地址（授权/委托目标）"
+                        placeholder="Address (grant or delegate to)"
                         value={inputAddress}
                         onChange={(e) => setInputAddress(e.target.value)}
                         className="input-address"
                     />
                     <button type="button" onClick={giveRight} disabled={txPending}>
-                        授权投票
+                        Grant vote
                     </button>
                     <button type="button" onClick={delegateVote} disabled={txPending}>
-                        委托投票
+                        Delegate vote
                     </button>
                 </div>
             </section>
 
             <section className="card highlight">
-                <h2>当前领先者</h2>
+                <h2>Current leader</h2>
                 <p className="winner">{summary?.winnerName ?? "—"}</p>
             </section>
         </div>
