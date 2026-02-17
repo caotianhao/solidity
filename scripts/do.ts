@@ -1,7 +1,7 @@
 import {ethers} from "hardhat";
 
 async function main() {
-    const provider = ethers.provider; // Hardhat 自带 provider
+    const provider = ethers.provider;
     const [sender, receiver] = await ethers.getSigners();
 
     console.log("Sender:", sender.address);

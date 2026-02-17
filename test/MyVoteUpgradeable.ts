@@ -24,18 +24,18 @@ describe("MyVoteUpgradeable (via ERC1967Proxy)", function () {
         myVote = MyVoteUpgradeable.attach(await proxy.getAddress()) as MyVoteUpgradeable;
     });
 
-    it("部署后 chairman 正确、提案数量正确", async function () {
+    it("has correct chairman and proposal count after deploy", async function () {
         expect(await myVote.chairman()).to.equal(chairman.address);
         expect(await myVote.getProposalsLength()).to.equal(3);
     });
 
-    it("主席可授权、选民可投票", async function () {
+    it("chair can grant and voter can vote", async function () {
         await myVote.giveRightToVote(voter1.address);
         await myVote.connect(voter1).doVote(1);
         expect(await myVote.winnerName()).to.equal("Bob");
     });
 
-    it("重复 initialize 应 revert", async function () {
+    it("reverts on double initialize", async function () {
         await expect(myVote.initialize(PROPOSALS)).to.be.revertedWith(
             "MyVoteUpgradeable: already initialized"
         );

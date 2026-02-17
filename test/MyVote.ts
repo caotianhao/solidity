@@ -10,7 +10,7 @@ const PROPOSALS = [
     "Paul", "Quincy", "Rachel", "Steve", "Tracy",
 ];
 
-describe("MyVote 合约测试", function () {
+describe("MyVote", function () {
     let myVote: MyVote;
     let chairman: SignerWithAddress;
     let voter1: SignerWithAddress;
@@ -24,25 +24,25 @@ describe("MyVote 合约测试", function () {
         await myVote.waitForDeployment();
     });
 
-    it("部署成功，主席权重为 1", async () => {
+    it("deploys with chair weight 1", async () => {
         const weight = (await myVote.voters(chairman.address)).weight;
         expect(weight).to.equal(1);
     });
 
-    it("giveRightToVote 正常工作", async () => {
+    it("giveRightToVote works", async () => {
         await myVote.giveRightToVote(voter1.address);
         const voterInfo = await myVote.voters(voter1.address);
         expect(voterInfo.weight).to.equal(1);
         expect(voterInfo.voted).to.be.false;
     });
 
-    it("非主席调用 giveRightToVote 应该失败", async () => {
+    it("reverts when non-chair calls giveRightToVote", async () => {
         await expect(
             myVote.connect(voter1).giveRightToVote(voter2.address)
         ).to.be.revertedWith("[giveRightToVote] not chairman");
     });
 
-    it("委托投票", async () => {
+    it("delegate vote", async () => {
         await myVote.giveRightToVote(voter1.address);
         await myVote.giveRightToVote(voter2.address);
 
@@ -54,7 +54,7 @@ describe("MyVote 合约测试", function () {
         expect(voter1Info.delegateTo).to.equal(voter2.address);
     });
 
-    it("直接投票", async () => {
+    it("direct vote", async () => {
         await myVote.giveRightToVote(voter1.address);
         await myVote.connect(voter1).doVote(3);
 
@@ -66,7 +66,7 @@ describe("MyVote 合约测试", function () {
         expect(proposal.voteCount).to.equal(1);
     });
 
-    it("计算胜利者", async () => {
+    it("computes winner", async () => {
         await myVote.giveRightToVote(voter1.address);
         await myVote.giveRightToVote(voter2.address);
 
@@ -81,14 +81,14 @@ describe("MyVote 合约测试", function () {
         expect(winnerName).to.equal("Bob");
     });
 
-    it("doVote 越界应失败", async () => {
+    it("reverts when doVote out of bounds", async () => {
         await myVote.giveRightToVote(voter1.address);
         await expect(myVote.connect(voter1).doVote(100)).to.be.revertedWith(
             "[doVote] invalid proposal index"
         );
     });
 
-    it("已投票后再次 doVote 应失败", async () => {
+    it("reverts when doVote after already voted", async () => {
         await myVote.giveRightToVote(voter1.address);
         await myVote.connect(voter1).doVote(0);
         await expect(myVote.connect(voter1).doVote(1)).to.be.revertedWith(
@@ -96,13 +96,13 @@ describe("MyVote 合约测试", function () {
         );
     });
 
-    it("授权应触发 RightToVoteGranted 事件", async () => {
+    it("emits RightToVoteGranted on grant", async () => {
         await expect(myVote.giveRightToVote(voter1.address))
             .to.emit(myVote, "RightToVoteGranted")
             .withArgs(voter1.address);
     });
 
-    it("委托应触发 Delegated 事件", async () => {
+    it("emits Delegated on delegate", async () => {
         await myVote.giveRightToVote(voter1.address);
         await myVote.giveRightToVote(voter2.address);
         await expect(myVote.connect(voter1).delegate(voter2.address))
@@ -110,14 +110,14 @@ describe("MyVote 合约测试", function () {
             .withArgs(voter1.address, voter2.address);
     });
 
-    it("投票应触发 VoteCast 事件", async () => {
+    it("emits VoteCast on vote", async () => {
         await myVote.giveRightToVote(voter1.address);
         await expect(myVote.connect(voter1).doVote(2))
             .to.emit(myVote, "VoteCast")
             .withArgs(voter1.address, 2, 1);
     });
 
-    it("getSummary 返回正确", async () => {
+    it("getSummary returns correct data", async () => {
         await myVote.giveRightToVote(voter1.address);
         await myVote.connect(chairman).doVote(1);
         const [chairman_, count, winner] = await myVote.getSummary();
