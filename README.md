@@ -15,8 +15,20 @@ hello-contract/
 │   ├── interfaces/
 │   └── beacon/
 ├── scripts/
+│   ├── deploy_MyVote.ts, deploy_MyVoteUpgradeable.ts, deploy_Faucet.ts, …
+│   ├── fund_Faucet.ts, withdraw_Faucet.ts
+│   └── do.ts
 ├── test/
+│   ├── MyVote.ts, MyVoteUpgradeable.ts
+│   ├── Lock.ts, Faucet.ts, SimpleToken.ts, Minter.ts
+│   └── HelloWorld.ts, exe.ts
+├── ignition/
+│   └── modules/
+│       └── Lock.ts
 ├── frontend/
+│   ├── src/
+│   ├── package.json, vite.config.ts, tsconfig.json
+│   └── index.html
 └── hardhat.config.ts
 ```
 
